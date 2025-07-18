@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package go;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "go-gen-patch/patch/patch";
+
+// Options represent Go-specific options for Protobuf messages, fields, oneofs, enums, or enum values.
+message Options {
+	// The name option renames the generated Go identifier and related identifiers.
+	// For a message, this renames the generated Go struct and nested messages or enums, if any.
+	// For a message field, this renames the generated Go struct field and getter method.
+	// For a oneof field, this renames the generated Go struct field, getter method, interface type, and wrapper types.
+	// For an enum, this renames the generated Go type.
+	// For an enum value, this renames the generated Go const.
+	optional string name = 1;	
+
+	// The type option changes the generated field type.
+	// All generated code assumes that this type is castable to the protocol buffer field type.
+	optional string type = 3;
+	
+	// The tags option specifies additional struct tags which are appended a generated Go struct field.
+	// This option may be specified on a message field or a oneof field.
+	// The value should omit the enclosing backticks.
+	optional string tags = 20;
+
+	// The nullable option specifies whether the field is object value or pointer.
+	// If true, the field is object value.
+	// If false, the field is pointer.
+	// If not specified, the field is pointer.
+	optional bool nullable = 30;
+}
+
+extend google.protobuf.FieldOptions {
+	optional Options field = 7001;
+}
+
