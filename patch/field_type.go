@@ -28,7 +28,7 @@ func (p *Patcher) patchTypeDef(id *ast.Ident, obj types.Object) {
 			}
 			return true
 		case *ast.StarExpr:
-			t.X = &ast.Ident{
+			v.Type = &ast.Ident{
 				Name: fieldType,
 			}
 			return true
@@ -95,6 +95,7 @@ func (p *Patcher) patchFunctionBody(fn *ast.FuncDecl, newType string) {
 	astutil.Apply(fn.Body, func(cursor *astutil.Cursor) bool {
 		if retStmt, ok := cursor.Node().(*ast.ReturnStmt); ok {
 			for i, result := range retStmt.Results {
+				log.Printf("result: %v", result)
 				retStmt.Results[i] = p.convertReturnValue(result, originalType, newType)
 			}
 		}
@@ -140,6 +141,7 @@ func isZeroValue(expr ast.Expr, typ string) bool {
 		}
 	// if return nil, return true
 	case *ast.Ident:
+		log.Printf("check originalType: %v", lit)
 		return lit.Name == "nil"
 	}
 	return false
@@ -180,16 +182,12 @@ func createZeroValue(typ string) ast.Expr {
 			}
 		}
 		// if is a custom type, return type{}
-		if isTypeValid(typ) {
-			return &ast.CompositeLit{
-				Type: &ast.Ident{
-					Name: typ,
-				},
-			}
+		return &ast.CompositeLit{
+			Type: &ast.Ident{
+				Name: typ,
+			},
 		}
-		return &ast.Ident{
-			Name: "nil",
-		}
+
 	}
 }
 

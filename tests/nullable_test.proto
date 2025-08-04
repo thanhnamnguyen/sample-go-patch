@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package tests;
+
+import "patch/go.proto";
+
+option go_package = "go-gen-patch/tests";
+
+message NullableType {
+    string name = 1;
+}
+
+message Test {
+    string id = 1 [(go.field).name = "ID"];    
+    // string id = 1;
+    NullableType nullable_name = 2 [(go.field).nullable = true];
+}
+
+service TestService {
+    rpc GetTest(Test) returns (Test);
+}

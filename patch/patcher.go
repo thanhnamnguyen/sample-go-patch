@@ -128,13 +128,14 @@ func (p *Patcher) scanField(f *protogen.Field) {
 	}
 
 	if newName != "" {
+		log.Printf("newName: %s", newName)
 		if o != nil {
-			p.RenameType(f.GoIdent, p.nameFor(m.GoIdent)+"_"+newName)           // Oneof wrapper struct
-			p.RenameField(ident.WithChild(f.GoIdent, f.GoName), newName, false) // Oneof wrapper field (not embeddable)
+			p.RenameType(f.GoIdent, p.nameFor(m.GoIdent)+"_"+newName)    // Oneof wrapper struct
+			p.RenameField(ident.WithChild(f.GoIdent, f.GoName), newName) // Oneof wrapper field (not embeddable)
 			ifName := ident.WithPrefix(o.GoIdent, "is")
 			p.RenameMethod(ident.WithChild(f.GoIdent, ifName.GoName), p.nameFor(ifName)) // Oneof interface method
 		} else {
-			p.RenameField(ident.WithChild(m.GoIdent, f.GoName), newName, embed) // Field
+			p.RenameField(ident.WithChild(m.GoIdent, f.GoName), newName) // Field
 		}
 		p.RenameMethod(ident.WithChild(m.GoIdent, "Get"+f.GoName), "Get"+newName) // Getter
 	}
@@ -148,6 +149,16 @@ func (p *Patcher) scanField(f *protogen.Field) {
 			p.Type(ident.WithChild(f.GoIdent, f.GoName), fieldType)
 			p.Type(ident.WithChild(m.GoIdent, "Get"+f.GoName), fieldType)
 		default:
+			p.Type(ident.WithChild(m.GoIdent, f.GoName), fieldType)
+			p.Type(ident.WithChild(m.GoIdent, "Get"+f.GoName), fieldType)
+		}
+	}
+
+	// check nullable
+	if nullable := opts.GetNullable(); nullable {
+		if f.Message != nil && !f.Desc.IsList() {
+			fieldType := f.Message.GoIdent.GoName
+			log.Printf("fieldType: %s", fieldType)
 			p.Type(ident.WithChild(m.GoIdent, f.GoName), fieldType)
 			p.Type(ident.WithChild(m.GoIdent, "Get"+f.GoName), fieldType)
 		}
@@ -189,12 +200,9 @@ func (p *Patcher) RenameValue(id protogen.GoIdent, newName string) {
 // The id argument specifies a GoName from GoImportPath, e.g.: "github.com/org/repo/example".FooMessage.BarField
 // newName should be the unqualified name (after the dot).
 // The value of id.GoName should be the original generated identifier name, not a renamed identifier.
-func (p *Patcher) RenameField(id protogen.GoIdent, newName string, embed bool) {
+func (p *Patcher) RenameField(id protogen.GoIdent, newName string) {
 	p.renames[id] = newName
 	p.fieldRenames[id] = newName
-	if embed {
-		p.embeds[id] = newName
-	}
 	log.Printf("Rename field:\t%s.%s → %s", id.GoImportPath, id.GoName, newName)
 }
 
@@ -496,6 +504,7 @@ func (p *Patcher) serializeGoFiles(res *pluginpb.CodeGeneratorResponse) error {
 		var b strings.Builder
 		err := format.Node(&b, p.fset, f)
 		if err != nil {
+			log.Printf("file: %v", f)
 			return err
 		}
 
@@ -530,6 +539,10 @@ func (p *Patcher) patchGoFiles() error {
 		}
 	}
 
+	log.Printf("\nFiles\n")
+	for _, f := range p.filesByName {
+		log.Printf("File: %s", f.Name.Name)
+	}
 	return nil
 }
 

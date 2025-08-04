@@ -137,7 +137,7 @@ const file_patch_go_proto_rawDesc = "" +
 	"\x05_typeB\a\n" +
 	"\x05_tagsB\v\n" +
 	"\t_nullable:D\n" +
-	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xd96 \x01(\v2\v.go.OptionsR\x05field\x88\x01\x01B\x1aZ\x18go-gen-patch/patch/patchb\x06proto3"
+	"\x05field\x12\x1d.google.protobuf.FieldOptions\x18\xd96 \x01(\v2\v.go.OptionsR\x05field\x88\x01\x01B\x14Z\x12go-gen-patch/patchb\x06proto3"
 
 var (
 	file_patch_go_proto_rawDescOnce sync.Once

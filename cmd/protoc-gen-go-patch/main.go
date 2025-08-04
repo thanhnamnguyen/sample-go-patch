@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -58,9 +57,9 @@ func run() error {
 		return fmt.Errorf("no protoc plugin specified; use 'protoc --%s_out=plugin=$PLUGIN:...'", s)
 	}
 
-	if os.Getenv("PROTO_PATCH_DEBUG_LOGGING") == "" {
-		log.SetOutput(ioutil.Discard)
-	}
+	// if os.Getenv("PROTO_PATCH_DEBUG_LOGGING") == "" {
+	// 	log.SetOutput(io.Discard)
+	// }
 
 	// Strip our custom param(s).
 	patch.StripParam(gen.Request, "plugin")
